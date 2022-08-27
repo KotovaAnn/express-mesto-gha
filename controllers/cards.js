@@ -37,7 +37,7 @@ const deleteCardById = async (req, res) => {
     }
     return res.status(STATUS_OK).send(card);
   } catch (err) {
-    if (err.kind === 'ObjectId') {
+    if (err.name === 'CastError') {
       return res.status(BAD_REQUEST_ERROR).send({ message: 'Невалидный ID карточки' });
     }
     return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Внутренняя ошибка сервера' });
@@ -56,7 +56,7 @@ const handleLikeCard = async (req, res) => {
     }
     return res.status(STATUS_OK).send(card);
   } catch (err) {
-    if (err.kind === 'ObjectId') {
+    if (err.name === 'CastError') {
       return res.status(BAD_REQUEST_ERROR).send({ message: 'Невалидный ID карточки' });
     }
     return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Внутренняя ошибка сервера' });
@@ -75,7 +75,7 @@ const handleLikeRemove = async (req, res) => {
     }
     return res.status(STATUS_OK).send(card);
   } catch (err) {
-    if (err.kind === 'ObjectId') {
+    if (err.name === 'CastError') {
       return res.status(BAD_REQUEST_ERROR).send({ message: 'Невалидный ID карточки' });
     }
     return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Внутренняя ошибка сервера' });
