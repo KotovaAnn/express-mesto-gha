@@ -46,7 +46,11 @@ const profileUpdate = async (req, res) => {
   try {
     const userId = req.user._id;
     const { name, about } = req.body;
-    const user = await User.findByIdAndUpdate(userId, { name, about });
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { name, about },
+      { new: true, runValidators: true },
+    );
     if (!user) {
       return res.status(NOT_FOUND_ERROR).send({ message: 'Такого пользователя не существует' });
     }
@@ -63,7 +67,11 @@ const avatarUpdate = async (req, res) => {
   try {
     const userId = req.user._id;
     const { avatar } = req.body;
-    const user = await User.findByIdAndUpdate(userId, { avatar });
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { avatar },
+      { new: true, runValidators: true },
+    );
     if (!user) {
       return res.status(NOT_FOUND_ERROR).send({ message: 'Такого пользователя не существует' });
     }
