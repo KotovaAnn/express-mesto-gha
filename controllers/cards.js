@@ -65,9 +65,9 @@ const handleLikeCard = async (req, res) => {
 
 const handleLikeRemove = async (req, res) => {
   try {
-    const card = Card.findByIdAndUpdate(
+    const card = await Card.findByIdAndUpdate(
       req.params.cardId,
-      { $pull: { likes: req.user._id } }, // убрать _id из массива
+      { $pull: { likes: req.user._id } },
       { new: true },
     );
     if (!card) {
