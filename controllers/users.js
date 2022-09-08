@@ -16,6 +16,19 @@ const getUsers = async (req, res, next) => {
   }
 };
 
+const getUserInfo = async (req, res, next) => {
+  const userId = req.user._id;
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return next(new NotFoundError('Такого пользователя не существует'));
+    }
+    return res.send(user);
+  } catch (err) {
+    return next(err);
+  }
+};
+
 const getUserbyId = async (req, res, next) => {
   const { userId } = req.params;
   try {
@@ -89,9 +102,9 @@ const login = async (req, res, next) => {
 };
 
 const profileUpdate = async (req, res, next) => {
+  const userId = req.user._id;
+  const { name, about } = req.body;
   try {
-    const userId = req.user._id;
-    const { name, about } = req.body;
     const user = await User.findByIdAndUpdate(
       userId,
       { name, about },
@@ -132,6 +145,7 @@ const avatarUpdate = async (req, res, next) => {
 
 module.exports = {
   getUsers,
+  getUserInfo,
   getUserbyId,
   createUser,
   login,
