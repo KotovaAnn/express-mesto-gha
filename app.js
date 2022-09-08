@@ -32,7 +32,7 @@ app.post('/signup', celebrate({
       .string()
       .default('https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png')
       // eslint-disable-next-line no-useless-escape
-      .required().regex(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*\/?$/),
+      .regex(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*\/?$/),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
