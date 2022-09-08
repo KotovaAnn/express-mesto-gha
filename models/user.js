@@ -5,21 +5,21 @@ const userSchema = new mongoose.Schema({
   name: {
     type: String,
     default: 'Жак-Ив Кусто',
-    required: [true, 'Поле "name" должно быть заполнено'],
-    minlength: [2, 'Минимальная длина поля "name" - 2'],
-    maxlength: [30, 'Максимальная длина поля "name" - 30'],
+    required: true,
+    minlength: 2,
+    maxlength: 30,
   },
   about: {
     type: String,
     default: 'Исследователь',
-    required: [true, 'Поле "about" должно быть заполнено'],
-    minlength: [2, 'Минимальная длина поля "about" - 2'],
-    maxlength: [30, 'Максимальная длина поля "about" - 30'],
+    required: true,
+    minlength: 2,
+    maxlength: 30,
   },
   avatar: {
     type: String,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
-    required: [true, 'Поле "avatar" должно быть заполнено'],
+    required: true,
     validate: {
       validator(v) {
       // eslint-disable-next-line no-useless-escape
@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: [true, 'Поле "email" должно быть заполнено'],
+    required: true,
     unique: true,
     validate: {
       validator: validator.isEmail,
@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     select: false,
-    required: [true, 'Поле "password" должно быть заполнено'],
+    required: true,
   },
 }, { versionKey: false });
 
