@@ -29,6 +29,7 @@ cardRouter.put('/cards/:cardId/likes', celebrate({
     cardId: Joi.string().alphanum().length(24),
   }),
 }), handleLikeCard);
+
 cardRouter.delete('/cards/:cardId/likes', celebrate({
   params: Joi.object().keys({
     cardId: Joi.string().alphanum().length(24),

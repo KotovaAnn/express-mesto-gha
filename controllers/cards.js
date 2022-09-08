@@ -27,7 +27,7 @@ const createCard = async (req, res, next) => {
 };
 
 const deleteCardById = async (req, res, next) => {
-  const cardId = req.params;
+  const { cardId } = req.params;
   const userId = req.user._id;
 
   try {
