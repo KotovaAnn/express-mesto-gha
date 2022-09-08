@@ -82,7 +82,7 @@ const login = async (req, res, next) => {
         sameSite: true,
       },
     );
-    return res.send({ data: user.toJSON });
+    return res.send(user);
   } catch (err) {
     return next(err);
   }
