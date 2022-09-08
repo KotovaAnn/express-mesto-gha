@@ -1,48 +1,94 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-const STATUS_OK = 200;
-const BAD_REQUEST_ERROR = 400;
-const NOT_FOUND_ERROR = 404;
-const INTERNAL_SERVER_ERROR = 500;
+const NotFoundError = require('../errors/not-found-err');
+const BadRequestError = require('../errors/bad-request-err');
+const UnauthorizedError = require('../errors/unauthorized-err');
+const ConflictError = require('../errors/conflict-err');
 
-const getUsers = async (req, res) => {
+const getUsers = async (req, res, next) => {
   try {
     const users = await User.find({});
-    return res.status(STATUS_OK).send(users);
+    return res.send(users);
   } catch (err) {
-    return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Внутренняя ошибка сервера' });
+    return next(err);
   }
 };
 
-const getUserbyId = async (req, res) => {
+const getUserbyId = async (req, res, next) => {
   const { userId } = req.params;
   try {
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(NOT_FOUND_ERROR).send({ message: 'Такого пользователя не существует' });
+      return next(new NotFoundError('Такого пользователя не существует'));
     }
-    return res.status(STATUS_OK).send(user);
+    return res.send(user);
   } catch (err) {
     if (err.kind === 'ObjectId') {
-      return res.status(BAD_REQUEST_ERROR).send({ message: 'Невалидный ID пользователя' });
+      return next(new BadRequestError('Невалидный ID пользователя'));
     }
-    return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Внутренняя ошибка сервера' });
+    return next(err);
   }
 };
 
-const createUser = async (req, res) => {
+const createUser = async (req, res, next) => {
   try {
-    const user = await new User(req.body).save();
-    return res.status(STATUS_OK).send(user);
+    const {
+      name,
+      about,
+      avatar,
+      email,
+      password,
+    } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await new User({
+      name,
+      about,
+      avatar,
+      email,
+      password: hashedPassword,
+    }).save();
+    return res.send(user);
   } catch (err) {
-    if (err.name === 'ValidationError') {
-      return res.status(BAD_REQUEST_ERROR).send({ message: 'Ошибка в запросе' });
+    if (err.code === 11000) {
+      return next(new ConflictError('Пользователь с таким email уже существует'));
     }
-    return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Внутренняя ошибка сервера' });
+    if (err.name === 'ValidationError') {
+      return next(new BadRequestError('Ошибка в запросе'));
+    }
+    return next(err);
   }
 };
 
-const profileUpdate = async (req, res) => {
+const login = async (req, res, next) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) {
+      return next(new UnauthorizedError('Неправильные почта или пароль'));
+    }
+    const isUserValid = bcrypt.compare(password, user.password);
+    if (!isUserValid) {
+      return next(new UnauthorizedError('Неправильные почта или пароль'));
+    }
+    const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+    res.cookie(
+      'jwt',
+      token,
+      {
+        maxAge: 3600000 * 24 * 7,
+        httpOnly: true,
+        sameSite: true,
+      },
+    );
+    return res.send({ data: user.toJSON });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+const profileUpdate = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const { name, about } = req.body;
@@ -52,18 +98,18 @@ const profileUpdate = async (req, res) => {
       { new: true, runValidators: true },
     );
     if (!user) {
-      return res.status(NOT_FOUND_ERROR).send({ message: 'Такого пользователя не существует' });
+      return next(new NotFoundError('Такого пользователя не существует'));
     }
-    return res.status(STATUS_OK).send(user);
+    return res.send(user);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      return res.status(BAD_REQUEST_ERROR).send({ message: 'Данные пользователя переданы некорректно' });
+      return next(new BadRequestError('Данные пользователя переданы некорректно'));
     }
-    return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Внутренняя ошибка сервера' });
+    return next(err);
   }
 };
 
-const avatarUpdate = async (req, res) => {
+const avatarUpdate = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const { avatar } = req.body;
@@ -73,14 +119,14 @@ const avatarUpdate = async (req, res) => {
       { new: true, runValidators: true },
     );
     if (!user) {
-      return res.status(NOT_FOUND_ERROR).send({ message: 'Такого пользователя не существует' });
+      return next(new NotFoundError('Такого пользователя не существует'));
     }
-    return res.status(STATUS_OK).send(user);
+    return res.send(user);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      return res.status(BAD_REQUEST_ERROR).send({ message: 'Данные переданы некорректно' });
+      return next(new BadRequestError('Данные переданы некорректно'));
     }
-    return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Внутренняя ошибка сервера' });
+    return next(err);
   }
 };
 
@@ -88,6 +134,7 @@ module.exports = {
   getUsers,
   getUserbyId,
   createUser,
+  login,
   profileUpdate,
   avatarUpdate,
 };

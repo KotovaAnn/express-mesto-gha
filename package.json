@@ -4,7 +4,6 @@
   "description": "[![Tests for sprint 13](https://github.com/KotovaAnn/express-mesto-gha/actions/workflows/tests-13-sprint.yml/badge.svg)](https://github.com/KotovaAnn/express-mesto-gha/actions/workflows/tests-13-sprint.yml)[![Tests for sprint 14](https://github.com/KotovaAnn/express-mesto-gha/actions/workflows/tests-14-sprint.yml/badge.svg)](https://github.com/KotovaAnn/express-mesto-gha/actions/workflows/tests-14-sprint.yml)\r # Проект Mesto фронтенд + бэкенд",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node --inspect app.js",
     "dev": "nodemon app.js",
     "debug": "nodemon --inspect app.js",
@@ -22,8 +21,15 @@
   },
   "homepage": "https://github.com/oxitenko/express-mesto-gha#readme",
   "dependencies": {
+    "bcrypt": "^5.0.1",
+    "bcryptjs": "^2.4.3",
+    "celebrate": "^15.0.1",
+    "cookie-parser": "^1.4.6",
     "express": "^4.18.1",
-    "mongoose": "^6.5.2"
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.5.2",
+    "path": "^0.12.7",
+    "validator": "^13.7.0"
   },
   "devDependencies": {
     "eslint": "^8.2.0",

@@ -1,50 +1,53 @@
 const Card = require('../models/card');
+const NotFoundError = require('../errors/not-found-err');
+const BadRequestError = require('../errors/bad-request-err');
+const ForbiddenError = require('../errors/forbidden-err');
 
-const STATUS_OK = 200;
-const BAD_REQUEST_ERROR = 400;
-const NOT_FOUND_ERROR = 404;
-const INTERNAL_SERVER_ERROR = 500;
-
-const getCards = async (req, res) => {
+const getCards = async (req, res, next) => {
   try {
     const cards = await Card.find({});
-    return res.status(STATUS_OK).send(cards);
+    return res.send(cards);
   } catch (err) {
-    return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Внутренняя ошибка сервера' });
+    return next(err);
   }
 };
 
-const createCard = async (req, res) => {
+const createCard = async (req, res, next) => {
   try {
     const owner = req.user._id;
     const { name, link } = req.body;
     const card = await Card.create({ name, link, owner });
-    return res.status(STATUS_OK).send(card);
+    return res.send(card);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      return res.status(BAD_REQUEST_ERROR).send({ message: 'Ошибка в запросе' });
+      return next(new BadRequestError('Ошибка в запросе'));
     }
-    return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Внутренняя ошибка сервера' });
+    return next(err);
   }
 };
 
-const deleteCardById = async (req, res) => {
+const deleteCardById = async (req, res, next) => {
   const { cardId } = req.params;
+  const userId = req.user._id;
+
   try {
     const card = await Card.findByIdAndRemove(cardId);
     if (!card) {
-      return res.status(NOT_FOUND_ERROR).send({ message: 'Такой карточки не существует' });
+      return next(new NotFoundError('Такой карточки не существует'));
     }
-    return res.status(STATUS_OK).send(card);
+    if (userId !== card.owner.toString()) {
+      return next(new ForbiddenError('Ошибка прав доступа'));
+    }
+    return res.send(card);
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(BAD_REQUEST_ERROR).send({ message: 'Невалидный ID карточки' });
+      return next(new BadRequestError('Невалидный ID карточки'));
     }
-    return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Внутренняя ошибка сервера' });
+    return next(err);
   }
 };
 
-const handleLikeCard = async (req, res) => {
+const handleLikeCard = async (req, res, next) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
@@ -52,18 +55,18 @@ const handleLikeCard = async (req, res) => {
       { new: true },
     );
     if (!card) {
-      return res.status(NOT_FOUND_ERROR).send({ message: 'Такой карточки нет' });
+      return next(new NotFoundError('Такой карточки не существует'));
     }
-    return res.status(STATUS_OK).send(card);
+    return res.send(card);
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(BAD_REQUEST_ERROR).send({ message: 'Невалидный ID карточки' });
+      return next(new BadRequestError('Невалидный ID карточки'));
     }
-    return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Внутренняя ошибка сервера' });
+    return next(err);
   }
 };
 
-const handleLikeRemove = async (req, res) => {
+const handleLikeRemove = async (req, res, next) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
@@ -71,14 +74,14 @@ const handleLikeRemove = async (req, res) => {
       { new: true },
     );
     if (!card) {
-      return res.status(NOT_FOUND_ERROR).send({ message: 'Такой карточки нет' });
+      return next(new NotFoundError('Такой карточки не существует'));
     }
-    return res.status(STATUS_OK).send(card);
+    return res.send(card);
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(BAD_REQUEST_ERROR).send({ message: 'Невалидный ID карточки' });
+      return next(new BadRequestError('Невалидный ID карточки'));
     }
-    return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Внутренняя ошибка сервера' });
+    return next(err);
   }
 };
 
