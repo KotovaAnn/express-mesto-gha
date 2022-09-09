@@ -28,8 +28,8 @@ router.post('/signup', celebrate({
 
 router.use(auth);
 
-router.use('/users', userRouter);
-router.use('/cards', cardRouter);
+router.use(userRouter);
+router.use(cardRouter);
 router.get('/signout', (req, res) => {
   res.clearCookie('jwt').send({ message: 'Выход' });
 });
