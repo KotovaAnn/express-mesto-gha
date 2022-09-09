@@ -31,7 +31,7 @@ const deleteCardById = async (req, res, next) => {
   const userId = req.user._id;
 
   try {
-    const card = await Card.finfById(cardId);
+    const card = await Card.findById(cardId);
     if (!card) {
       return next(new NotFoundError('Такой карточки не существует'));
     }
