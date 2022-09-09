@@ -1,36 +1,33 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const regex = require('../utils/constants');
 
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
     default: 'Жак-Ив Кусто',
-    required: true,
     minlength: 2,
     maxlength: 30,
   },
   about: {
     type: String,
     default: 'Исследователь',
-    required: true,
     minlength: 2,
     maxlength: 30,
   },
   avatar: {
     type: String,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
-    required: true,
     validate: {
       validator(v) {
-      // eslint-disable-next-line no-useless-escape
-        return /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*\/?$/.test(v);
+        return regex.test(v);
       },
       message: 'Ошибка: невалидная ссылка',
     },
   },
   email: {
     type: String,
-    required: true,
+    required: [true, 'Поле "email" должно быть заполнено'],
     unique: true,
     validate: {
       validator: validator.isEmail,
@@ -40,7 +37,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     select: false,
-    required: true,
+    required: [true, 'Поле "password" должно быть заполнено'],
   },
 }, { versionKey: false });
 

@@ -31,14 +31,15 @@ const deleteCardById = async (req, res, next) => {
   const userId = req.user._id;
 
   try {
-    const card = await Card.findByIdAndRemove(cardId);
+    const card = await Card.finfById(cardId);
     if (!card) {
       return next(new NotFoundError('Такой карточки не существует'));
     }
-    if (userId !== card.owner.toString()) {
+    if (!card.owner.equals(userId)) {
       return next(new ForbiddenError('Ошибка прав доступа'));
     }
-    return res.send(card);
+    card.remove();
+    return res.send({ message: 'Карточка удалена' });
   } catch (err) {
     if (err.name === 'CastError') {
       return next(new BadRequestError('Невалидный ID карточки'));
