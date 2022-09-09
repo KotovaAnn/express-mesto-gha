@@ -27,8 +27,12 @@ router.post('/signup', celebrate({
 }), createUser);
 
 router.use(auth);
+
 router.use('/users', userRouter);
 router.use('/cards', cardRouter);
+router.get('/signout', (req, res) => {
+  res.clearCookie('jwt').send({ message: 'Выход' });
+});
 
 router.use((req, res, next) => {
   next(new NotFoundError('Код ответа: 404. Такой страницы не существует'));
