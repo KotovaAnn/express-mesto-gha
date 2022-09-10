@@ -38,7 +38,7 @@ const deleteCardById = async (req, res, next) => {
     if (!card.owner.equals(userId)) {
       return next(new ForbiddenError('Ошибка прав доступа'));
     }
-    card.remove();
+    await card.remove();
     return res.send({ message: 'Карточка удалена' });
   } catch (err) {
     if (err.name === 'CastError') {

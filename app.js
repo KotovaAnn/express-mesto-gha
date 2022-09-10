@@ -14,8 +14,6 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use(routes);
-app.use(errors());
-app.use(errorHandler);
 
 async function main(res, next) {
   try {
@@ -32,3 +30,6 @@ async function main(res, next) {
 }
 
 main();
+
+app.use(errors());
+app.use(errorHandler);
